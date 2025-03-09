@@ -9,6 +9,7 @@ function App() {
   return (
     <>
       <div>
+        <h1>There is rebase issue</h1>
         <h2>Not rebased yet</h2>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
