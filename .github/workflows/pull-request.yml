@@ -1,0 +1,54 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-pr:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check if PR is up-to-date with main
+        run: |
+          git fetch origin main
+          MAIN_SHA=$(git rev-parse origin/main)
+          MERGE_BASE=$(git merge-base HEAD origin/main)
+          if [ "$MERGE_BASE" != "$MAIN_SHA" ]; then
+            echo "Warning: Your PR is not up-to-date with the latest main branch."
+            echo "Consider rebasing on the latest main to ensure compatibility."
+          fi
+      
+      - name: Check for merge conflicts
+        run: |
+          git fetch origin main
+          if ! git merge-tree $(git merge-base HEAD origin/main) HEAD origin/main | grep -q "^<<<<<<< "; then
+            echo "No merge conflicts detected."
+          else
+            echo "Merge conflicts detected. Please resolve them before merging."
+            exit 1
+          fi
+      
+      - name: Check for .nvmrc file
+        run: |
+          if [ ! -f .nvmrc ]; then
+            echo ".nvmrc file is missing. Please add it to specify the Node.js version."
+            exit 1
+          fi
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run build
+        run: npm run build
