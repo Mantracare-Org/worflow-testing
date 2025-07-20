@@ -35,13 +35,6 @@ jobs:
             exit 1
           fi
       
-      - name: Check for .nvmrc file
-        run: |
-          if [ ! -f .nvmrc ]; then
-            echo ".nvmrc file is missing. Please add it to specify the Node.js version."
-            exit 1
-          fi
-      
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
